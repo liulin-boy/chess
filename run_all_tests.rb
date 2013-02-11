@@ -1,0 +1,8 @@
+﻿require_relative 'specs/board_tester.rb'
+require_relative 'specs/piece_tester.rb'
+require_relative 'specs/bishop_tester.rb'
+require_relative 'specs/knight_tester.rb'
+require_relative 'specs/rook_tester.rb'
+require_relative 'specs/queen_tester.rb'
+require_relative 'specs/king_tester.rb'
+require_relative 'specs/pawn_tester.rb'
