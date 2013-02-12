@@ -34,6 +34,11 @@ module Chess
         select { |row, column| row.between?(0, 7) and column.between?(0, 7) }
     end
 
+    def sign
+      @color == :white ? "p".yellow.bold : "p".red.bold
+    end
+
+
     # TO DO: promotion, en passant
   end
 end

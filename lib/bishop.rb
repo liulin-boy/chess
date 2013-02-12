@@ -8,5 +8,9 @@ module Chess
       super
       @vector_moves = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
     end
+
+    def sign
+      @color == :white ? "B".yellow.bold : "B".red.bold
+    end
   end
 end

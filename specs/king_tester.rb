@@ -16,15 +16,6 @@ module Chess
       assert_equal([[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]], k.vector_moves)
     end
 
-    def test_in_check?
-      game_board = Board.new()
-      k = King.new(1, 2, :white, game_board)
-      b = Bishop.new(5, 6, :black, game_board)
-      assert(k.in_check?)
-      b = Bishop.new(3, 4, :white, game_board)
-      assert_equal(false, k.in_check?)
-    end
-
     def test_range
       game_board = Board.new()
       k = King.new(0, 1, :white, game_board)
@@ -43,5 +34,27 @@ module Chess
       assert_equal(2, k.column)
       assert(!k.first_move)
     end
+
+    def test_in_check?
+      game_board = Board.new()
+      k = King.new(1, 2, :white, game_board)
+      b = Bishop.new(5, 6, :black, game_board)
+      assert(k.in_check?)
+      b = Bishop.new(3, 4, :white, game_board)
+      assert_equal(false, k.in_check?)
+    end
+
+    def test_in_checkmate?
+      game_board = Board.new
+      k = King.new(0, 0, :white, game_board)
+      assert(!k.in_check?)
+      q = Queen.new(1, 1, :black, game_board)
+      assert(!k.in_checkmate?)
+      b1 = Bishop.new(3, 3, :black, game_board)
+      assert(k.in_checkmate?)
+      b2 = Bishop.new(0, 2, :white, game_board)
+      assert(!k.in_checkmate?)
+    end
+
   end
 end

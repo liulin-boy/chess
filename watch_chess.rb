@@ -8,12 +8,12 @@ watch('chess/lib/(.*)\.rb') do |match_file|
 #  output = `ruby 'D:/Program Files/Ruby/Ruby193/bin/chess/specs/#{match_file[1]}_tester.rb'`
 
   if success
-    system %Q{growlnotify /t:"OK" /i:"D:/Program Files/Ruby/Ruby193/bin/scripts/ok-icon.png" "row: #{match_file[1]}.rb"}
+    system %Q{growlnotify /t:"OK" /i:"D:/Program Files/Ruby/Ruby193/bin/scripts/ok-icon.png" "row: #{output}.rb"}
     #OR
     #system "growlnotify /t:\"OK\" \"#{output}\""
     puts 'OK'
   else
-    system %Q{growlnotify /t:"fail" /i:"D:/Program Files/Ruby/Ruby193/bin/scripts/fail-icon.png" "row: #{match_file[1]}.rb"}
+    system %Q{growlnotify /t:"fail" /i:"D:/Program Files/Ruby/Ruby193/bin/scripts/fail-icon.png" "row: #{output}.rb"}
     puts 'fail'
   end
 end
@@ -27,12 +27,12 @@ watch('chess/specs/(.*)\.rb') do |match_file|
 #  output = `ruby 'D:/Program Files/Ruby/Ruby193/bin/chess/specs/#{match_file[1]}.rb'`
 
   if success
-    system %Q{growlnotify /t:"OK" /i:"D:/Program Files/Ruby/Ruby193/scripts/ok-icon.png" "row: #{match_file[1]}.rb"}
+    system %Q{growlnotify /t:"OK" /i:"D:/Program Files/Ruby/Ruby193/scripts/ok-icon.png" "row: #{output}.rb"}
     #OR
     #system "growlnotify /t:\"OK\" \"#{output}\""
     puts 'OK'
   else
-    system %Q{growlnotify /t:"fail" /i:"D:/Program Files/Ruby/Ruby193/scripts/fail-icon.png" "row: #{match_file[1]}.rb"}
+    system %Q{growlnotify /t:"fail" /i:"D:/Program Files/Ruby/Ruby193/scripts/fail-icon.png" "row: #{output}.rb"}
     puts 'fail'
   end
 end

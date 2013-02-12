@@ -43,7 +43,8 @@ module Chess
       return false if range.none? { |row, column| row == to_row and column == to_column }
       return false if @board[to_row, to_column] and @board[to_row, to_column].color == @color
       return false if leap?(to_row, to_column)
-      # TO DO: return false if move_causes_self_check?(to_row, to_column)
+      return false if move_causes_self_check?(to_row, to_column)
+
       true
     end
 
@@ -62,7 +63,6 @@ module Chess
       else
         delta_column = 0
       end
-
       current_row = @row + delta_row
       current_column = @column + delta_column
       while current_row != to_row and current_column != to_column
@@ -75,14 +75,16 @@ module Chess
     end
 
     def move_causes_self_check?(to_row, to_column)
-      copy_board = @board.deep_copy
-      begin
-        copy_board[@row, @column].move(to_row, to_column)
-      rescue IllegalMove
-        false
-      else
+        raise IllegalMove if range.none? { |row, column| row == to_row and column == to_column }
+        raise IllegalMove if @board[to_row, to_column] and @board[to_row, to_column].color == @color
+        raise IllegalMove if leap?(to_row, to_column)
+        copy_board = @board.deep_copy
+        piece = copy_board[@row, @column]
+        copy_board[@row, @column] = nil
+        copy_board[to_row, to_column] = piece
+        piece.row, piece.column = to_row, to_column
+
         copy_board.find_king(@color) and copy_board.find_king(@color).under_attack?
-      end
     end
 
     def under_attack?

@@ -24,9 +24,12 @@ module Chess
       assert_equal(b.column, 2)
 
       game_board = Board.new()
-      b = Bishop.new(3, 4, :white, game_board)
+      k = King.new(0, 0, :white, game_board)
+      b = Bishop.new(3, 4, :black, game_board)
       assert_raises(IllegalMove) { b.move(2, 2) } # y u assert_raise no work for me!
-    end
+      assert_raises(IllegalMove) { k.move(0, 1) }
+
+   end
 
     def test_range
       game_board = Board.new()
@@ -34,7 +37,7 @@ module Chess
       assert_equal([[2, 3], [1, 2], [0, 1], [2, 5], [1, 6], [0, 7], [4, 3], [5, 2], [6, 1], [7, 0], [4, 5], [5, 6], [6, 7]], b.range)
     end
 
-    def test_valid_destination?
+    def test_valid_move?
       game_board = Board.new
       b1 = Bishop.new(3, 4, :white, game_board)
       assert(!b1.valid_move?(0, 0))
@@ -47,6 +50,11 @@ module Chess
 
       b4 = Bishop.new(4, 5, :black, game_board)
       assert(!b1.valid_move?(5, 6))
+
+      game_board = Board.new
+      k = King.new(0, 0, :white, game_board)
+      b = Bishop.new(4, 5, :black, game_board)
+      assert(!k.valid_move?(0, 1))
     end
 
     def test_leap?
@@ -74,13 +82,17 @@ module Chess
     def test_move_causes_self_check?
       game_board = Board.new
       b1 = Bishop.new(3, 4, :white, game_board)
-      assert(!b1.move_causes_self_check?(3, 3))
+      assert_raises(IllegalMove) { b1.move_causes_self_check?(3, 3) } # TO DO: ? is it good raising ex?
 
-      assert(!b1.move_causes_self_check?(4, 5))
 
-      k = King.new(2, 3, :white, game_board)
-      b2 = Bishop.new(5, 6, :black, game_board)
-      assert(b1.move_causes_self_check?(2, 5))
+      game_board = Board.new
+      k = King.new(0, 0, :white, game_board)
+      b1 = Bishop.new(2, 2, :white, game_board)
+      b2 = Bishop.new(4, 4, :black, game_board)
+      assert(b1.move_causes_self_check?(0, 4))
+      assert(!b1.move_causes_self_check?(4, 4))
+      b3 = Bishop.new(4, 5, :black, game_board)
+      assert(k.move_causes_self_check?(0, 1))
     end
 
   end
