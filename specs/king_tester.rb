@@ -13,13 +13,13 @@ module Chess
       assert_equal(game_board, k.board)
       assert_equal(k, k.board[1,2])
       assert(k.first_move)
-      assert_equal([[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]], k.vector_moves)
+      assert_equal([[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]], k.vector_moves)
     end
 
     def test_range
       game_board = Board.new()
       k = King.new(0, 1, :white, game_board)
-      assert_equal([[0, 2], [1, 2], [1, 1], [1, 0], [0, 0]], k.range)
+      assert_equal([[0, 0], [0, 2], [1, 0], [1, 1], [1, 2]], k.range)
     end
 
     def test_move

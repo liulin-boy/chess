@@ -1,35 +1,13 @@
 ﻿$:.unshift('D:/Program Files/Ruby/Ruby193/bin/chess/lib')
 
+require 'string_formatting'
+require 'game'
 require 'king'
 require 'queen'
 require 'rook'
 require 'bishop'
 require 'knight'
 require 'pawn'
-
-require 'win32console'
-class String
-  { :reset          =>  0,
-    :bold           =>  1,
-    :dark           =>  2,
-    :underline      =>  4,
-    :blink          =>  5,
-    :negative       =>  7,
-    :black          => 30,
-    :red            => 31,
-    :green          => 32,
-    :yellow         => 33,
-    :blue           => 34,
-    :magenta        => 35,
-    :cyan           => 36,
-    :white          => 37,
-    :white_back     => 47,
-  }.each do |key, value|
-    define_method key do
-      "\e[#{value}m" + self + "\e[0m"
-    end
-  end
-end
 
 module Chess
   class Board
@@ -39,12 +17,12 @@ module Chess
       @field = Array.new(8) { Array.new(8) }
     end
 
-    def [](column, row)
-      @field[column][row]
+    def [](row, column)
+      @field[row][column]
     end
 
-    def []=(column, row, piece)
-      @field[column][row] = piece
+    def []=(row, column, piece)
+      @field[row][column] = piece
     end
 
     def white_king
@@ -69,8 +47,6 @@ module Chess
 
       new_board
     end
-
-    # TO DO: ? private
 
     def find_king(color)
       @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.color == color }
@@ -105,10 +81,28 @@ module Chess
 				piece_type.new(0, column, :black, self)
 				piece_type.new(7, column, :white, self)
       end
-      show
+
+      self
     end
 
-    Board.new.reset
+    COLUMN_HASH = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
+    ROW_HASH    = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
+
+    def move(from_square, to_square) # TO DO: ? specify player
+      from_row = ROW_HASH[from_square[1]]
+      from_column = COLUMN_HASH[from_square[0]]
+      to_row = ROW_HASH[to_square[1]]
+      to_column = COLUMN_HASH[to_square[0]]
+      self[from_row, from_column].move(to_row, to_column)
+
+      true
+    rescue IllegalMove => ex
+      piece_type = self[from_row, from_column].class.name.split('::').last
+      puts "Illegal move!: #{piece_type} from #{from_square} to #{to_square}".red.bold
+
+      false
+    end
+
   end
 end
 

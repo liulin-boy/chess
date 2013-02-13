@@ -18,8 +18,7 @@ module Chess
         @board[to_row, to_column] = self
         @row, @column = to_row, to_column
       else
-        # TO DO: fix the message
-        raise IllegalMove, "#{self.class} from coords [#{@row}, #{@column}] to [#{to_row}, #{to_column}]"
+        raise IllegalMove, "#{self.class.name.split('::').last} cannot move from coords [#{@row}, #{@column}] to [#{to_row}, #{to_column}]"
       end
     end
 
@@ -65,7 +64,7 @@ module Chess
       end
       current_row = @row + delta_row
       current_column = @column + delta_column
-      while current_row != to_row and current_column != to_column
+      while current_row != to_row or current_column != to_column
         return true if @board[current_row, current_column]
         current_row = current_row + delta_row
         current_column = current_column + delta_column
@@ -75,16 +74,16 @@ module Chess
     end
 
     def move_causes_self_check?(to_row, to_column)
-        raise IllegalMove if range.none? { |row, column| row == to_row and column == to_column }
-        raise IllegalMove if @board[to_row, to_column] and @board[to_row, to_column].color == @color
-        raise IllegalMove if leap?(to_row, to_column)
-        copy_board = @board.deep_copy
-        piece = copy_board[@row, @column]
-        copy_board[@row, @column] = nil
-        copy_board[to_row, to_column] = piece
-        piece.row, piece.column = to_row, to_column
+      raise IllegalMove if range.none? { |row, column| row == to_row and column == to_column }
+      raise IllegalMove if @board[to_row, to_column] and @board[to_row, to_column].color == @color
+      raise IllegalMove if leap?(to_row, to_column)
+      copy_board = @board.deep_copy
+      piece = copy_board[@row, @column]
+      copy_board[@row, @column] = nil
+      copy_board[to_row, to_column] = piece
+      piece.row, piece.column = to_row, to_column
 
-        copy_board.find_king(@color) and copy_board.find_king(@color).under_attack?
+      copy_board.find_king(@color) and copy_board.find_king(@color).under_attack?
     end
 
     def under_attack?

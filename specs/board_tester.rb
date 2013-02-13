@@ -36,5 +36,17 @@ module Chess
       Bishop.new(2, 2, :white, game_board)
       #assert_equal(game_board, copy_board) # doesnt work at all
     end
+
+    def test_move
+      game_board = Board.new.reset
+      assert(game_board.move('a2', 'a4'))
+      assert(game_board.move('e7', 'e5'))
+
+      assert(!game_board.move('a1', 'a4'))
+      assert(game_board.move('a1', 'a3'))
+      assert(game_board.move('b8', 'c6'))
+      assert(game_board.move('e8', 'e7'))
+      game_board.show
+    end
   end
 end

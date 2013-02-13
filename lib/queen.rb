@@ -6,7 +6,7 @@ module Chess
 
     def initialize(row, column, color, board)
       super
-      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]]
+      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
     end
 
     def sign

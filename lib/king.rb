@@ -7,7 +7,7 @@ module Chess
     def initialize(row, column, color, board)
       super
       @first_move = true # for castling
-      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, 1], [1, 1], [1, 0], [1, -1], [0, -1]] # TO DO: add castling
+      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]] # TO DO: add castling
     end
 
     def move(to_row, to_column)
