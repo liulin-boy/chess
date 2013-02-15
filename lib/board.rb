@@ -11,6 +11,11 @@ require 'pawn'
 
 module Chess
   class Board
+    COLUMN_HASH = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
+    ROW_HASH    = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
+    PIECE_HASH  = {'K' => King, 'Q' => Queen, 'R' => Rook, 'N' => Knight, 'B' => Bishop, 'P' => Pawn}
+    PLAYER_HASH = {'w' => :white, 'b' => :black}
+
     attr_accessor :field
 
     def initialize()
@@ -48,16 +53,16 @@ module Chess
       puts
       puts "  +---+---+---+---+---+---+---+---+"
       @field.each_with_index do |row, i|
-				print "#{(1..8).to_a.reverse[i]} |"
+        print "#{(1..8).to_a.reverse[i]} |"
 				row.each do |piece|
-					if piece
-						print " #{piece.sign} |"
-					else
-						print "   |"
-					end
-				end
-				puts
-				puts "  +---+---+---+---+---+---+---+---+"
+          if piece
+            print " #{piece.sign} |"
+          else
+            print "   |"
+          end
+        end
+        puts
+        puts "  +---+---+---+---+---+---+---+---+"
       end
       puts "    a   b   c   d   e   f   g   h"
     end
@@ -66,12 +71,12 @@ module Chess
       pieces = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
       @field = Array.new(8) { Array.new(8) }
       0.upto(7).each do |column|
-				Pawn.new(1, column, :black, self)
-				Pawn.new(6, column, :white, self)
+        Pawn.new(1, column, :black, self)
+        Pawn.new(6, column, :white, self)
       end
       pieces.each_with_index do |piece_type, column|
-				piece_type.new(0, column, :black, self)
-				piece_type.new(7, column, :white, self)
+        piece_type.new(0, column, :black, self)
+        piece_type.new(7, column, :white, self)
       end
 
       self
@@ -99,30 +104,24 @@ module Chess
       false
     end
 
-      COLUMN_HASH = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
-      ROW_HASH    = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
-      PIECE_HASH  = {'K' => King, 'Q' => Queen, 'R' => Rook, 'N' => Knight, 'B' => Bishop, 'P' => Pawn}
-      PLAYER_HASH = {'w' => :white, 'b' => :black}
-
     def self.load_from_string(str)
       board = Board.new
-      str.split(' ').each do |item|
+      str.split.each do |item|
         player = PLAYER_HASH[item[0]]
         piece_type = PIECE_HASH[item[1].capitalize]
         column = COLUMN_HASH[item[2]]
         row = ROW_HASH[item[3]]
         p item, row, column, player, piece_type
         if board[row, column]
-          puts 'Invalid string. Two or more pieces on same position'.red.bold
+          puts "Invalid string. Two or more pieces on same position".red.bold
           return
-
         else
           piece_type.new(row, column, player, board)
         end
       end
       board
     rescue
-      puts 'Invalid string!'.red.bold
+      puts "Invalid string!".red.bold
     end
   end
 end
