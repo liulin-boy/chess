@@ -9,7 +9,7 @@ module Chess
       p1 = Pawn.new(6, 1, :white, game_board)
       assert_equal(6, p1.row)
       assert_equal(1, p1.column)
-      assert_equal(:white, p1.color)
+      assert_equal(:white, p1.player)
       assert_equal(game_board, p1.board)
       assert_equal(p1, p1.board[6, 1])
       assert(p1.first_move)

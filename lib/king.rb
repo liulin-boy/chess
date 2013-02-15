@@ -4,7 +4,7 @@ module Chess
   class King < Piece
     attr_accessor :vector_moves, :first_move
 
-    def initialize(row, column, color, board)
+    def initialize(row, column, player, board)
       super
       @first_move = true # for castling
       @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]] # TO DO: add castling
@@ -21,7 +21,7 @@ module Chess
 
     def in_checkmate?
       return false unless in_check?
-      @board.field.flatten.select { |piece| piece and piece.color == @color}.all? do |piece|
+      @board.field.flatten.select { |piece| piece and piece.player == @player}.all? do |piece|
         piece.range.all? do |to_row, to_column|
           !piece.valid_move?(to_row, to_column) or
             piece.move_causes_self_check?(to_row, to_column) # TO DO: shouldnt get away from checkmate with castling
@@ -35,7 +35,7 @@ module Chess
     end
 
     def sign
-      @color == :white ? "K".yellow.bold : "K".red.bold
+      @player == :white ? "K".yellow.bold : "K".red.bold
     end
 
   end

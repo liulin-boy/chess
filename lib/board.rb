@@ -25,22 +25,14 @@ module Chess
       @field[row][column] = piece
     end
 
-    def white_king
-      find_king(:white)
-    end
-
-    def white_king
-      find_king(:black)
-    end
-
     def deep_copy
       new_board = Board.new
       @field.each_with_index do |row, r_index|
         row.each_with_index do |column, c_index|
           piece = @field[r_index][c_index]
           if piece
-            copy = piece.class.new(r_index, c_index, piece.color, new_board)
-            new_board[r_index, c_index] = copy
+            copy_piece = piece.class.new(piece.row, piece.column, piece.player, new_board)
+            new_board[r_index, c_index] = copy_piece
           end
         end
       end
@@ -48,8 +40,8 @@ module Chess
       new_board
     end
 
-    def find_king(color)
-      @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.color == color }
+    def find_king(player)
+      @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.player == player }
     end
 
     def show
@@ -85,14 +77,18 @@ module Chess
       self
     end
 
-    COLUMN_HASH = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
-    ROW_HASH    = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
-
-    def move(from_square, to_square) # TO DO: ? specify player
+    def make_move(from_square, to_square, player)
       from_row = ROW_HASH[from_square[1]]
-      from_column = COLUMN_HASH[from_square[0]]
+      from_column = COLUMN_HASH[from_square[0].downcase]
       to_row = ROW_HASH[to_square[1]]
-      to_column = COLUMN_HASH[to_square[0]]
+      to_column = COLUMN_HASH[to_square[0].downcase]
+
+
+      if self[from_row, from_column].player != player
+        piece_type = self[from_row, from_column].class.name.split('::').last
+        puts "Illegal move!: #{piece_type} on #{from_square} does not belong to #{player}s".red.bold
+        return false
+      end
       self[from_row, from_column].move(to_row, to_column)
 
       true
@@ -103,6 +99,31 @@ module Chess
       false
     end
 
+      COLUMN_HASH = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
+      ROW_HASH    = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
+      PIECE_HASH  = {'K' => King, 'Q' => Queen, 'R' => Rook, 'N' => Knight, 'B' => Bishop, 'P' => Pawn}
+      PLAYER_HASH = {'w' => :white, 'b' => :black}
+
+    def self.load_from_string(str)
+      board = Board.new
+      str.split(' ').each do |item|
+        player = PLAYER_HASH[item[0]]
+        piece_type = PIECE_HASH[item[1].capitalize]
+        column = COLUMN_HASH[item[2]]
+        row = ROW_HASH[item[3]]
+        p item, row, column, player, piece_type
+        if board[row, column]
+          puts 'Invalid string. Two or more pieces on same position'.red.bold
+          return
+
+        else
+          piece_type.new(row, column, player, board)
+        end
+      end
+      board
+    rescue
+      puts 'Invalid string!'.red.bold
+    end
   end
 end
 

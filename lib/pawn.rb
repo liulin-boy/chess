@@ -3,10 +3,10 @@
 module Chess
   class Pawn < Piece
     attr_accessor :vector_moves, :first_move
-    def initialize(row, column, color, board)
+    def initialize(row, column, player, board)
       super
       @first_move = true
-      if color == :white
+      if player == :white
         @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [-2, 0]]
       else
         @vector_moves = [[1, -1], [1, 0], [1, 1], [2, 0]]
@@ -24,7 +24,8 @@ module Chess
       return false if to_column == @column and @board[to_row, to_column]
       return false if (to_row - @row).abs == 2 and @board[(to_row + @row)/2, @column]
       return false if to_column != @column and
-        (@board[to_row, to_column].nil? or @board[to_row, to_column].color == @color)
+        (@board[to_row, to_column].nil? or @board[to_row, to_column].player == @player)
+      return false if move_causes_self_check?(to_row, to_column)
 
       true
     end
@@ -35,7 +36,7 @@ module Chess
     end
 
     def sign
-      @color == :white ? "p".yellow.bold : "p".red.bold
+      @player == :white ? "p".yellow.bold : "p".red.bold
     end
 
 

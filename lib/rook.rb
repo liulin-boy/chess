@@ -3,7 +3,7 @@ module Chess
   class Rook < Piece
     attr_accessor :vector_moves
 
-    def initialize(row, column, color, board)
+    def initialize(row, column, player, board)
       super
       @first_move = true
       @vector_moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
@@ -15,7 +15,7 @@ module Chess
     end
 
     def castle
-      king = @board.find_king(@color)
+      king = @board.find_king(@player)
 			raise(IllegalMove, "Cannot castle, Rook alredy moved") unless @first_move
       raise(IllegalMove, "Cannot castle, Rook alredy moved") unless king.first_move
       raise(IllegalMove, "Cannot castle, King is in check") if king.in_check?
@@ -52,7 +52,7 @@ module Chess
 		end
 
     def sign
-      @color == :white ? "R".yellow.bold : "R".red.bold
+      @player == :white ? "R".yellow.bold : "R".red.bold
     end
   end
 end

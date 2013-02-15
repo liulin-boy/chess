@@ -9,7 +9,7 @@ module Chess
       p = Piece.new(1, 2, :white, game_board)
       assert_equal(1, p.row)
       assert_equal(2, p.column)
-      assert_equal(:white, p.color)
+      assert_equal(:white, p.player)
       assert_equal(game_board, p.board)
       assert_equal(p, p.board[1,2])
     end
@@ -32,6 +32,11 @@ module Chess
       game_board = Board.new.reset
       r = game_board[0, 0]
       assert_raises(IllegalMove) { r.move(0, 7) }
+
+      game_board = Board.new
+      k = King.new(0, 0, :white, game_board)
+      b = Bishop.new(4, 4, :black, game_board)
+      assert_raises(IllegalMove) { k.move(1, 1) }
    end
 
     def test_range
@@ -69,6 +74,7 @@ module Chess
       assert(!r.valid_move?(5, 0))
       assert(!r.valid_move?(0, 1))
     end
+
 
     def test_leap?
       game_board = Board.new

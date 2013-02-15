@@ -9,7 +9,7 @@ module Chess
       k = King.new(1, 2, :white, game_board)
       assert_equal(1, k.row)
       assert_equal(2, k.column)
-      assert_equal(:white, k.color)
+      assert_equal(:white, k.player)
       assert_equal(game_board, k.board)
       assert_equal(k, k.board[1,2])
       assert(k.first_move)

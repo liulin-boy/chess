@@ -1,6 +1,7 @@
 ﻿$:.unshift('D:/Program Files/Ruby/Ruby193/bin/chess/lib')
 require 'board'
 require 'minitest/autorun'
+require 'game'
 
 module Chess
   class BoardTester < MiniTest::Unit::TestCase
@@ -19,33 +20,47 @@ module Chess
       game_board = Board.new
       assert_equal(nil, game_board.find_king(:white))
       k = King.new(1, 2, :black, game_board)
-      assert_equal(nil, game_board.find_king(:white))
+      k2 = King.new(6, 7, :white, game_board)
+      assert_equal(k2, game_board.find_king(:white))
       assert_equal(k, game_board.find_king(:black))
-    end
 
-    def test_white_king
-      game_board = Board.new
-      assert_equal(nil, game_board.white_king)
-      k1 = King.new(1, 2, :black, game_board)
     end
 
     def xtest_deep_copy
-      game_board = Board.new
-      b = Bishop.new(1, 2, :white, game_board)
+      game_board = Board.new.reset
       copy_board = game_board.deep_copy
-      Bishop.new(2, 2, :white, game_board)
-      #assert_equal(game_board, copy_board) # doesnt work at all
+
+      assert(copy_board.make_move('a2', 'a4', :white))
+      assert(game_board.make_move('e7', 'e5', :black))
+
+      game_board.show
+
+      copy_board.show
     end
 
-    def test_move
+    def xtest_move
       game_board = Board.new.reset
-      assert(game_board.move('a2', 'a4'))
-      assert(game_board.move('e7', 'e5'))
+      assert(game_board.make_move('d2', 'd4', :white))
+      assert(game_board.make_move('e7', 'e5', :black))
+      assert(game_board.make_move('a2', 'a3', :white))
+      assert(game_board.make_move('e5', 'd4', :black))
+      assert(game_board.make_move('d1', 'd4', :white))
+      assert(game_board.make_move('g8', 'h6', :black))
+      assert(game_board.make_move('d4', 'e5', :white))
+      assert(!game_board.make_move('a7', 'a6', :black))
+      assert(!game_board.make_move('h6', 'g4', :black))
+      assert(game_board.make_move('f8', 'e7', :black))
 
-      assert(!game_board.move('a1', 'a4'))
-      assert(game_board.move('a1', 'a3'))
-      assert(game_board.move('b8', 'c6'))
-      assert(game_board.move('e8', 'e7'))
+      game_board.show
+    end
+
+    def xtest_game_run
+      game_board = Board.new.reset
+      Game.new(game_board).play
+    end
+
+    def xtest_load_from_string
+      game_board = Board.load_from_string('wKa1 bNb2 bpe4')
       game_board.show
     end
   end

@@ -4,13 +4,13 @@ module Chess
   class Queen < Piece
     attr_accessor :vector_moves
 
-    def initialize(row, column, color, board)
+    def initialize(row, column, player, board)
       super
       @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
     end
 
     def sign
-      @color == :white ? "Q".yellow.bold : "Q".red.bold
+      @player == :white ? "Q".yellow.bold : "Q".red.bold
     end
   end
 end
