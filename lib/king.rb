@@ -1,13 +1,11 @@
-﻿require_relative 'piece'
+﻿require 'piece'
 
 module Chess
   class King < Piece
-    attr_accessor :vector_moves, :first_move
-
     def initialize(row, column, player, board)
       super
-      @first_move = true # for castling
-      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]] # TO DO: add castling
+      @first_move = true
+      @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
     end
 
     def move(to_row, to_column)
@@ -24,7 +22,7 @@ module Chess
       @board.field.flatten.select { |piece| piece and piece.player == @player}.all? do |piece|
         piece.range.all? do |to_row, to_column|
           !piece.valid_move?(to_row, to_column) or
-            piece.move_causes_self_check?(to_row, to_column) # TO DO: shouldnt get away from checkmate with castling
+            piece.move_causes_self_check?(to_row, to_column)
         end
       end
     end

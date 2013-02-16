@@ -2,7 +2,6 @@
 
 module Chess
   class Pawn < Piece
-    attr_accessor :vector_moves, :first_move
     def initialize(row, column, player, board)
       super
       @first_move = true

@@ -3,8 +3,6 @@ require 'errors'
 
 module Chess
   class Piece
-    attr_accessor :row, :column, :player, :board
-
     def initialize(row, column, player, board)
       @row, @column = row, column
       @player, @board = player, board
@@ -96,5 +94,8 @@ module Chess
       false
     end
 
+    def first_move?
+      @first_move
+    end
   end
 end
