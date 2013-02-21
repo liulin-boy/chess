@@ -2,7 +2,7 @@
 
 module Chess
   class Knight < Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       super
       @vector_moves = [[-2, -1], [-2, 1], [-1, 2], [1, 2], [2, 1], [2, -1], [1, -2], [-1, -2]]
     end

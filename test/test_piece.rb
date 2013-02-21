@@ -30,7 +30,6 @@ module Chess
       assert !r1.same_as?(r2)
     end
 
-    # TO DO: ? stupid test
     def test_initialize
       game_board = Board.new
       p = Piece.new(1, 2, :white, game_board)

@@ -2,19 +2,13 @@
 
 module Chess
   class Pawn < Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       super
-      @first_move = true
       if player == :white
         @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [-2, 0]]
       else
         @vector_moves = [[1, -1], [1, 0], [1, 1], [2, 0]]
       end
-    end
-
-    def move(to_row, to_column)
-      super
-      @first_move = false
     end
 
     def valid_move?(to_row, to_column)

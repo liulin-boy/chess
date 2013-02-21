@@ -1,8 +1,8 @@
-﻿$:.unshift('chess/lib') # full path: D:/Program Files/Ruby/Ruby193/bin/chess/lib
+﻿$:.unshift('chess/lib')
 require 'board'
 require 'game'
 require 'minitest/autorun'
-require_relative 'accessors'
+require_relative 'utilities'
 require 'mysql2'
 
 module Chess
@@ -17,7 +17,7 @@ module Chess
     def test_writer
       b = Board.new
       b[1,2] = :test
-      assert_equal(:test, b[1,2])
+      assert_equal :test, b[1,2]
     end
 
     def test_same_as
@@ -66,7 +66,7 @@ module Chess
       assert !copy_board.same_as?(game_board)
     end
 
-    def xtest_move
+    def test_move
       game_board = Board.new.reset
       assert game_board.make_move('d2', 'd4', :white)
       assert game_board.make_move('e7', 'e5', :black)
@@ -75,26 +75,15 @@ module Chess
       assert game_board.make_move('d1', 'd4', :white)
       assert game_board.make_move('g8', 'h6', :black)
       assert game_board.make_move('d4', 'e5', :white)
-      assert !game_board.make_move('a7', 'a6', :black)
-      assert !game_board.make_move('h6', 'g4', :black)
+      assert_raises(IllegalMove) { game_board.make_move('a7', 'a6', :black) }
+      assert_raises(IllegalMove) { game_board.make_move('h6', 'g4', :black) }
+      assert_raises(IllegalMove) { game_board.make_move('f8', 'e7', :white) }
       assert game_board.make_move('f8', 'e7', :black)
-
-      game_board.show
     end
 
     def xtest_game_run
       game_board = Board.new.reset
       Game.new(game_board).play
-    end
-
-    def test_load_from_string
-      game_board1 = Board.new
-      k = King.new(7, 0, :white, game_board1)
-      n = Knight.new(6, 1, :black, game_board1)
-      p = Pawn.new(4, 4, :black, game_board1)
-      game_board2 = Board.load_from_string('wKa1 bNb2 bpe4')
-
-      assert game_board1.same_as?(game_board2)
     end
 
     def test_to_string
@@ -106,20 +95,55 @@ module Chess
       assert_equal 'bKe8 bBe5 wRc1', game_board.to_string
     end
 
+    def test_load_from_string
+      game_board1 = Board.new
+      k = King.new(7, 0, :white, game_board1)
+      n = Knight.new(6, 1, :black, game_board1)
+      p = Pawn.new(4, 4, :black, game_board1)
+      assert_raises (RuntimeError) { Board.load_from_string('illegal string') }
 
-    def xtest_save_to_database
-      game_board = Board.new
-      k = King.new(0, 4, :black, game_board)
-      b = Bishop.new(3, 4, :black, game_board)
-      r = Rook.new(7, 2, :white, game_board)
+      game_board2 = Board.load_from_string('wKa1 bNb2 bpe4')
 
-      db = Mysql2::Client.new(:host => "localhost", :username => "root", :port => 3306, :database => "ruby")
-      game_board.save_to_database(db, "test_board")
-      p results = db.query("SELECT * FROM test_board")
-      results.map {|item| p item}
-      db.query("SELECT * FROM test_board")
+      assert game_board1.same_as?(game_board2)
 
-      db.query("DROP TABLE IF EXISTS test_board")
+      assert game_board1.same_as?(Board.load_from_string(game_board1.to_string))
+    end
+
+    def test_save_to_database
+      game_board1 = Board.new
+      k = King.new(0, 4, :black, game_board1)
+      b = Bishop.new(3, 4, :black, game_board1)
+      r = Rook.new(7, 2, :white, game_board1)
+
+      mysql2_client = Mysql2::Client.new(:host => "localhost", :username => "root", :port => 3306, :database => "ruby")
+      mysql2_client.query("DROP TABLE IF EXISTS test_board")
+      game_board1.save_to_database(mysql2_client, "test_board")
+      results = mysql2_client.query("SELECT * FROM test_board")
+      game_board2 = Board.new
+      results.each do |item|
+        klass      = eval(item["piece_type"])
+        row        = Board::ROW[item["rank"].to_s]
+        column     = Board::COLUMN[item["file"]]
+        player     = item["player"].to_sym
+        first_move = item["first_move"] == "1"
+        klass.new(row, column, player, game_board2, first_move)
+      end
+      assert game_board2.same_as?(game_board1)
+    end
+
+    def test_load_from_database
+      mysql2_client = Mysql2::Client.new(:host => "localhost", :username => "root", :port => 3306, :database => "ruby")
+      assert_raises(RuntimeError) { Board.load_from_database(mysql2_client, "nonexistent_table") }
+      assert Board.load_from_database(mysql2_client, "test_board")
+
+      game_board1 = Board.new
+      k = King.new(0, 4, :black, game_board1)
+      b = Bishop.new(3, 4, :black, game_board1)
+      r = Rook.new(7, 2, :white, game_board1)
+      mysql2_client.query("DROP TABLE IF EXISTS test_board")
+      game_board1.save_to_database(mysql2_client, "test_board")
+      game_board2 = Board.load_from_database(mysql2_client, "test_board")
+      assert game_board2.same_as?(game_board1)
     end
   end
 end

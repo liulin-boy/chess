@@ -2,15 +2,10 @@
 
 module Chess
   class King < Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       super
-      @first_move = true
+      @first_move = first_move
       @vector_moves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
-    end
-
-    def move(to_row, to_column)
-      super
-      @first_move = false
     end
 
     def in_check?

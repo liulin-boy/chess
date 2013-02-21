@@ -2,15 +2,9 @@
 
 module Chess
   class Rook < Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       super
-      @first_move = true
       @vector_moves = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-    end
-
-    def move(to_row, to_column)
-      super
-      @first_move = false
     end
 
     def castle

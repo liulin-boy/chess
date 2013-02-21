@@ -93,38 +93,19 @@ module Chess
       to_column = COLUMN[to_square[0].downcase]
       if self[from_row, from_column].player != player
         piece_type = self[from_row, from_column].class.name.split('::').last
-        puts "Illegal move!: #{piece_type} on #{from_square} does not belong to #{player}s".red.bold
-        return false
+        raise IllegalMove, "Piece on #{from_square} does not belong to #{player} player!".red.bold
       end
-      self[from_row, from_column].move(to_row, to_column)
+      begin
+        self[from_row, from_column].move(to_row, to_column)
+      rescue IllegalMove => ex
+        piece_type = self[from_row, from_column].class.name.split('::').last
+        raise IllegalMove, "Cannot move #{piece_type} from #{from_square} to #{to_square}!".red.bold
+      end
 
       true
-    rescue IllegalMove => ex
-      piece_type = self[from_row, from_column].class.name.split('::').last
-      puts "Illegal move!: #{piece_type} from #{from_square} to #{to_square}".red.bold
-
-      false
     end
 
-    def self.load_from_string(str)
-      board = Board.new
-      str.split.each do |item|
-        player = PLAYER[item[0]]
-        piece_type = PIECE[item[1].capitalize]
-        column = COLUMN[item[2]]
-        row = ROW[item[3]]
-        if board[row, column]
-          puts "Invalid string. Two or more pieces on same position".red.bold
-          return
-        else
-          piece_type.new(row, column, player, board)
-        end
-      end
-      board
-    rescue
-      puts "Invalid string!".red.bold
-    end
-
+    # TO DO: ? fix string format
     def to_string
       @field.flatten.select{ |piece| piece }.map do |piece|
         player_letter = PLAYER_LETTER[piece.player]
@@ -135,30 +116,70 @@ module Chess
       end.join ' '
     end
 
-    # i'm using mysql2 gem
-    def save_to_database(db, table_name)
-      query_string =
-        "CREATE  TABLE `ruby`.`#{table_name}`
-        (`id` INT NOT NULL ,
-        `player` VARCHAR(10) NULL ,
-        `piece_type` VARCHAR(10) NULL ,
-        `file` CHAR NULL , `rank` INT NULL ,
-        `first_move` BINARY NULL ,
-        PRIMARY KEY (`id`) );"
-      db.query(query_string)
+    def save_to_database(mysql2_client, table_name)
+      create_table =
+        "CREATE  TABLE `#{mysql2_client.query_options[:database]}`.`#{table_name}`(
+          `id` INT NOT NULL ,
+          `player` VARCHAR(10) NULL ,
+          `piece_type` VARCHAR(10) NULL ,
+          `file` CHAR NULL , `rank` INT NULL ,
+          `first_move` BINARY NULL ,
+          PRIMARY KEY (`id`)
+        );"
+      mysql2_client.query(create_table)
       current_id = 1
       @field.flatten.select{ |piece| piece }.map do |piece|
         piece_type = piece.class.name.split('::').last
         player = piece.player
         file = FILE[piece.column]
         rank = RANK[piece.row]
-        first_move = !!piece.first_move?
-
-        query_string = "INSERT INTO #{table_name} (id, piece_type, player, file, rank, first_move)
+        first_move = piece.first_move?
+        insert =
+          "INSERT INTO #{table_name}(id, piece_type, player, file, rank, first_move)
           VALUES(#{current_id}, '#{piece_type}', '#{player}', '#{file}', #{rank}, #{first_move} );"
-        db.query(query_string)
+        mysql2_client.query(insert)
         current_id = current_id.next
       end
+    end
+
+    def self.load_from_string(str)
+      board = Board.new
+      str.split.each do |item|
+        player = PLAYER[item[0]]
+        piece_type = PIECE[item[1].capitalize]
+        row = ROW[item[3]]
+        column = COLUMN[item[2]]
+        if player.nil? or piece_type.nil? or row.nil? or column.nil? or board[row, column]
+          raise "Invalid string!".red.bold
+        else
+          piece_type.new(row, column, player, board)
+        end
+      end
+
+      board
+    end
+
+    def self.load_from_database(mysql2_client, table_name)
+      game_board = Board.new
+      if_table_exists =
+        "SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = '#{mysql2_client.query_options[:database]}'
+        AND table_name = '#{table_name}';"
+      if mysql2_client.query(if_table_exists).size == 0
+        raise "No such table (#{table_name})!".red.bold
+      end
+      results = mysql2_client.query("SELECT * FROM #{table_name}")
+      results.each do |item|
+        klass      = eval(item["piece_type"])
+        row        = ROW[item["rank"].to_s]
+        column     = COLUMN[item["file"]]
+        player     = item["player"].to_sym
+        first_move = item["first_move"] == "1"
+        klass.new(row, column, player, game_board, first_move)
+      end
+
+      game_board
     end
   end
 end

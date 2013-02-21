@@ -3,10 +3,11 @@ require 'errors'
 
 module Chess
   class Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       @row, @column = row, column
       @player, @board = player, board
       @board[row, column] = self
+      @first_move = first_move
       @vector_moves = []
     end
 
@@ -15,10 +16,11 @@ module Chess
         @board[@row, @column] = nil
         @board[to_row, to_column] = self
         @row, @column = to_row, to_column
+        @first_move = false
       else
-        message = "#{self.class.name.split('::').last} cannot move from coords [#{@row}, #{@column}] to [#{to_row}, #{to_column}]"
+        #message = "#{self.class.name.split('::').last} cannot move from coords [#{@row}, #{@column}] to [#{to_row}, #{to_column}]"
         #puts message
-        raise IllegalMove, message
+        raise IllegalMove
       end
     end
 
@@ -64,7 +66,7 @@ module Chess
     def under_attack?
       @board.field.flatten.any? do |piece|
         piece and piece.player != @player and
-          piece.valid_move?(@row, @column) # TO DO: use range, instead
+          piece.valid_move?(@row, @column)
       end
     end
 

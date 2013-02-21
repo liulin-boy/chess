@@ -1,6 +1,6 @@
 ﻿require 'rook'
 require 'minitest/autorun'
-#require_relative 'accessors'
+#require_relative 'utilities'
 
 module Chess
   class RookTester < MiniTest::Unit::TestCase

@@ -1,4 +1,4 @@
-﻿# this file defines methods, in order to provide less complicated tests
+﻿# this file defines additional methods for Chess::Board and Chess::Piece, in order to provide less complicated tests
 
 module Chess
   class Board

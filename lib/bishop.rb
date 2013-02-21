@@ -1,8 +1,8 @@
-﻿require_relative 'piece'
+﻿require 'piece'
 
 module Chess
   class Bishop < Piece
-    def initialize(row, column, player, board)
+    def initialize(row, column, player, board, first_move = true)
       super
       @vector_moves = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
     end
