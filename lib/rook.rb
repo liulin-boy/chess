@@ -9,30 +9,29 @@ module Chess
 
     def castle
       king = @board.find_king(@player)
-			raise(IllegalMove, "Cannot castle, Rook alredy moved") unless @first_move
-      raise(IllegalMove, "Cannot castle, Rook alredy moved") unless king.first_move?
-      raise(IllegalMove, "Cannot castle, King is in check") if king.in_check?
-
+			raise IllegalMove unless first_move? and king.first_move?
+      raise IllegalMove if king.in_check?
       if @column == 0 # 0-0-0
-        raise(IllegalMove, "Cannot castle, path is blocked") if @board[@row, 1] or @board[@row, 2] or @board[@row, 3]
-        raise(IllegalMove, "Cannot castle, King passes through attacked square") if king.move_causes_self_check?(king.row, 3)
+        raise IllegalMove if king.move_causes_self_check?(king.row, 3) or
+          @board[@row, 1] or @board[@row, 2] or @board[@row, 3]
         king.column = 2
         if king.in_check?
           king.column = 4
-          raise(IllegalMove, "Cannot castle, King will be in check")
+          raise IllegalMove
         end
         @board[king.row, 4] = nil
         @board[king.row, 2] = king
         @board[@row, 0] = nil
         @board[@row, 3] = self
         @column = 3
+
+        true
       else # 0-0
-        raise(IllegalMove, "Cannot castle, path is blocked") if @board[@row, 5] or @board[@row, 6]
-        raise(IllegalMove, "Cannot castle, King passes through attacked square") if king.move_causes_self_check?(king.row, 5)
+        raise IllegalMove if king.move_causes_self_check?(king.row, 5) or @board[@row, 5] or @board[@row, 6]
         king.column = 6
         if king.in_check?
           king.column = 4
-          raise(IllegalMove, "Cannot castle, King will be in check")
+          raise IllegalMove
         end
         @board[king.row, 4] = nil
         @board[king.row, 6] = king
@@ -42,6 +41,8 @@ module Chess
       end
       @first_move = false
       king.instance_variable_set(:@first_move, false)
+
+      true
 		end
 
     def sign

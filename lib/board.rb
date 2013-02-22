@@ -11,14 +11,13 @@ require 'pawn'
 
 module Chess
   class Board
-    COLUMN        = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
-    ROW           = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
-    PIECE         = {'K' => King, 'Q' => Queen, 'R' => Rook, 'N' => Knight, 'B' => Bishop, 'P' => Pawn}
-    PLAYER        = {'w' => :white, 'b' => :black}
-    FILE          = COLUMN.invert
-    RANK          = ROW.invert
-    PIECE_LETTER  = PIECE.invert
-    PLAYER_LETTER = PLAYER.invert
+    FIRST_ROW_PIECES = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+    ALL_PIECES       = [King, Queen, Rook, Knight, Bishop, Pawn]
+    ALL_PLAYERS      = [:white, :black]
+    COLUMN           = {'a' => 0, 'b' => 1, 'c' => 2, 'd' => 3, 'e' => 4, 'f' => 5, 'g' => 6, 'h' => 7}
+    ROW              = {'8' => 0, '7' => 1, '6' => 2, '5' => 3, '4' => 4, '3' => 5, '2' => 6, '1' => 7}
+    FILE             = COLUMN.invert
+    RANK             = ROW.invert
 
     def initialize
       @field = Array.new(8) { Array.new(8) }
@@ -30,6 +29,45 @@ module Chess
 
     def []=(row, column, value)
       @field[row][column] = value
+    end
+
+    def find_king(player)
+      @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.player == player }
+    end
+
+    def make_move(from_square, to_square, player)
+      from_row = ROW[from_square[1]]
+      from_column = COLUMN[from_square[0].downcase]
+      to_row = ROW[to_square[1]]
+      to_column = COLUMN[to_square[0].downcase]
+      if self[from_row, from_column].player != player
+        piece_type = self[from_row, from_column].class.name.split('::').last
+        raise IllegalMove, "Piece on #{from_square} does not belong to #{player} player!".red.bold
+      end
+      begin
+        self[from_row, from_column].move(to_row, to_column)
+      rescue IllegalMove
+        piece_type = self[from_row, from_column].class.name.split('::').last
+        raise IllegalMove, "Cannot move #{piece_type} from #{from_square} to #{to_square}!".red.bold
+      end
+
+      true
+    end
+
+    def queenside_castle(player)
+      if player == :white
+        self[7, 0].castle
+      else
+        self[0, 0].castle
+      end
+    end
+
+    def kingside_castle(player)
+      if player == :white
+        self[7, 7].castle
+      else
+        self[0, 7].castle
+      end
     end
 
     def deep_copy
@@ -45,10 +83,6 @@ module Chess
       end
 
       new_board
-    end
-
-    def find_king(player)
-      @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.player == player }
     end
 
     def show
@@ -68,17 +102,16 @@ module Chess
       end
       puts "    a   b   c   d   e   f   g   h"
 
-      self # because it's cool
+      self # just because it's cool
     end
 
     def reset
-      pieces = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
       @field = Array.new(8) { Array.new(8) }
       0.upto(7).each do |column|
         Pawn.new(1, column, :black, self)
         Pawn.new(6, column, :white, self)
       end
-      pieces.each_with_index do |piece_type, column|
+      FIRST_ROW_PIECES.each_with_index do |piece_type, column|
         piece_type.new(0, column, :black, self)
         piece_type.new(7, column, :white, self)
       end
@@ -86,33 +119,15 @@ module Chess
       self
     end
 
-    def make_move(from_square, to_square, player)
-      from_row = ROW[from_square[1]]
-      from_column = COLUMN[from_square[0].downcase]
-      to_row = ROW[to_square[1]]
-      to_column = COLUMN[to_square[0].downcase]
-      if self[from_row, from_column].player != player
-        piece_type = self[from_row, from_column].class.name.split('::').last
-        raise IllegalMove, "Piece on #{from_square} does not belong to #{player} player!".red.bold
-      end
-      begin
-        self[from_row, from_column].move(to_row, to_column)
-      rescue IllegalMove => ex
-        piece_type = self[from_row, from_column].class.name.split('::').last
-        raise IllegalMove, "Cannot move #{piece_type} from #{from_square} to #{to_square}!".red.bold
-      end
-
-      true
-    end
-
-    # TO DO: ? fix string format
     def to_string
       @field.flatten.select{ |piece| piece }.map do |piece|
-        player_letter = PLAYER_LETTER[piece.player]
-        piece_letter = PIECE_LETTER[piece.class]
+        piece_type = piece.class.name.split('::').last
+        player = piece.player.to_s
         file = FILE[piece.column]
         rank = RANK[piece.row]
-        "#{player_letter}#{piece_letter}#{file}#{rank}"
+        move_status = piece.first_move? ? "" : " moved"
+
+        "#{player} #{piece_type} #{file}#{rank}#{move_status};"
       end.join ' '
     end
 
@@ -144,42 +159,59 @@ module Chess
 
     def self.load_from_string(str)
       board = Board.new
-      str.split.each do |item|
-        player = PLAYER[item[0]]
-        piece_type = PIECE[item[1].capitalize]
-        row = ROW[item[3]]
-        column = COLUMN[item[2]]
-        if player.nil? or piece_type.nil? or row.nil? or column.nil? or board[row, column]
-          raise "Invalid string!".red.bold
+      str.split(';').each do |item|
+        /\A((?<player>\w*) (?<piece_type>\w*) (?<file>[a-h])(?<rank>[1-8])(?<move_status>( moved)?))\z/ =~ item.strip
+        player = $~[:player].to_sym
+        piece_type = eval($~[:piece_type])
+        row = ROW[$~[:rank]]
+        column = COLUMN[$~[:file]]
+        first_move = $~[:move_status] == ""
+        if not ALL_PLAYERS.include?(player) or not ALL_PIECES.include?(piece_type) or row.nil? or column.nil?
+          raise
         else
-          piece_type.new(row, column, player, board)
+          piece_type.new(row, column, player, board, first_move)
         end
       end
 
       board
-    end
+    rescue
+      raise "Invalid string to load from! - '#{str}'".red.bold
+end
 
     def self.load_from_database(mysql2_client, table_name)
-      game_board = Board.new
-      if_table_exists =
+      board = Board.new
+      matching_tables =
         "SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = '#{mysql2_client.query_options[:database]}'
         AND table_name = '#{table_name}';"
-      if mysql2_client.query(if_table_exists).size == 0
+      if mysql2_client.query(matching_tables).size.zero?
         raise "No such table (#{table_name})!".red.bold
       end
       results = mysql2_client.query("SELECT * FROM #{table_name}")
       results.each do |item|
-        klass      = eval(item["piece_type"])
-        row        = ROW[item["rank"].to_s]
+        piece_type = eval(item["piece_type"])
+        row        = ROW[item["rank"].to_s] # TO DO: data validation
         column     = COLUMN[item["file"]]
         player     = item["player"].to_sym
-        first_move = item["first_move"] == "1"
-        klass.new(row, column, player, game_board, first_move)
+
+        if item["first_move"] == "1"
+          first_move = true
+        elsif item["first_move"] == "0"
+          first_move = true
+        else
+          raise
+        end
+        if not ALL_PLAYERS.include?(player) or not ALL_PIECES.include?(piece_type) or row.nil? or column.nil?
+          raise
+        else
+          piece_type.new(row, column, player, board, first_move)
+        end
       end
 
-      game_board
+      board
+    rescue
+      raise "Invalid table to load from! - '#{table_name}'".red.bold
     end
   end
 end

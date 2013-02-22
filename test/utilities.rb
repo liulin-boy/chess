@@ -18,10 +18,24 @@ module Chess
   class Piece
     attr_accessor :row, :column, :player, :board, :vector_moves
 
+    public :valid_move?, :range, :move_causes_self_check?, :leap?, :under_attack?
+
     def same_as?(other)
       return false unless other.is_a? Piece
       self.class == other.class and @player == other.player and
         @row == other.row and @column == other.column and first_move? == other.first_move?
     end
+  end
+
+  class King
+    public :range
+  end
+
+  class Pawn
+    public :valid_move?, :range
+  end
+
+  class Knight
+    public :leap?, :range
   end
 end

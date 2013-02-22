@@ -18,11 +18,15 @@ module Chess
         @row, @column = to_row, to_column
         @first_move = false
       else
-        #message = "#{self.class.name.split('::').last} cannot move from coords [#{@row}, #{@column}] to [#{to_row}, #{to_column}]"
-        #puts message
         raise IllegalMove
       end
     end
+
+    def first_move?
+      @first_move
+    end
+
+    private
 
     def range
       squares_in_range = []
@@ -94,10 +98,6 @@ module Chess
       end
 
       false
-    end
-
-    def first_move?
-      @first_move
     end
   end
 end

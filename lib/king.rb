@@ -13,24 +13,31 @@ module Chess
     end
 
     def in_checkmate?
-      return false unless in_check?
-      @board.field.flatten.select { |piece| piece and piece.player == @player}.all? do |piece|
-        piece.range.all? do |to_row, to_column|
-          !piece.valid_move?(to_row, to_column) or
-            piece.move_causes_self_check?(to_row, to_column)
-        end
-      end
+      in_check? and player_has_no_valid_moves?
     end
 
-    def range
-      @vector_moves.map { |delta_row, delta_column|  [@row + delta_row, @column + delta_column]}.
-        select { |row, column| row.between?(0, 7) and column.between?(0, 7) }
+    def in_stalemate?
+      not in_check? and player_has_no_valid_moves?
     end
 
     def sign
       @player == :white ? "K".yellow.bold : "K".red.bold
     end
 
+    private
+
+    def range
+      @vector_moves.map { |delta_row, delta_column| [@row + delta_row, @column + delta_column]}.
+        select { |row, column| row.between?(0, 7) and column.between?(0, 7) }
+    end
+
+    def player_has_no_valid_moves?
+      @board.field.flatten.select { |piece| piece and piece.player == @player}.all? do |piece|
+        piece.range.all? do |to_row, to_column|
+          !piece.valid_move?(to_row, to_column)
+        end
+      end
+    end
   end
 end
 

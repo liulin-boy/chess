@@ -11,6 +11,12 @@ module Chess
       end
     end
 
+    def sign
+      @player == :white ? "p".yellow.bold : "p".red.bold
+    end
+
+    private
+
     def valid_move?(to_row, to_column)
       return false if range.none? { |row, column| row == to_row and column == to_column}
       return false if (to_row - @row).abs == 2 and !@first_move
@@ -27,11 +33,6 @@ module Chess
       @vector_moves.map { |delta_row, delta_column|  [@row + delta_row, @column + delta_column]}.
         select { |row, column| row.between?(0, 7) and column.between?(0, 7) }
     end
-
-    def sign
-      @player == :white ? "p".yellow.bold : "p".red.bold
-    end
-
 
     # TO DO: promotion, en passant
   end
