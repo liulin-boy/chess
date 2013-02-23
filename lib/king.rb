@@ -24,8 +24,6 @@ module Chess
       @player == :white ? "K".yellow.bold : "K".red.bold
     end
 
-    private
-
     def range
       @vector_moves.map { |delta_row, delta_column| [@row + delta_row, @column + delta_column]}.
         select { |row, column| row.between?(0, 7) and column.between?(0, 7) }

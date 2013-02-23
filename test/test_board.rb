@@ -1,6 +1,5 @@
 ﻿$:.unshift('chess/lib')
 require 'board'
-require 'game'
 require 'minitest/autorun'
 require_relative 'utilities'
 require 'mysql2'
@@ -32,7 +31,7 @@ module Chess
       board1 = Board.new.reset
       board2 = Board.new.reset
       assert board1.same_as?(board1)
-      board1.make_move('d2', 'd4', :white)
+      board1.execute_move('d2', 'd4', :white)
       assert !board1.same_as?(board2)
 
       board1 = Board.new.reset
@@ -52,23 +51,39 @@ module Chess
 
     def test_move
       board = Board.new.reset
-      assert board.make_move('d2', 'd4', :white)
-      assert board.make_move('e7', 'e5', :black)
-      assert board.make_move('a2', 'a3', :white)
-      assert board.make_move('e5', 'd4', :black)
-      assert board.make_move('d1', 'd4', :white)
-      assert board.make_move('g8', 'h6', :black)
-      assert board.make_move('d4', 'e5', :white)
-      assert_raises(IllegalMove) { board.make_move('a7', 'a6', :black) }
-      assert_raises(IllegalMove) { board.make_move('h6', 'g4', :black) }
-      assert_raises(IllegalMove) { board.make_move('f8', 'e7', :white) }
-      assert board.make_move('f8', 'e7', :black)
+      assert board.execute_move('d2', 'd4', :white)
+      assert board.execute_move('e7', 'e5', :black)
+      assert board.execute_move('a2', 'a3', :white)
+      assert board.execute_move('e5', 'd4', :black)
+      assert board.execute_move('d1', 'd4', :white)
+      assert board.execute_move('g8', 'h6', :black)
+      assert board.execute_move('d4', 'e5', :white)
+      assert_raises(IllegalMove) { board.execute_move('a7', 'a6', :black) }
+      assert_raises(IllegalMove) { board.execute_move('h6', 'g4', :black) }
+      assert_raises(IllegalMove) { board.execute_move('f8', 'e7', :white) }
+      assert board.execute_move('f8', 'e7', :black)
+
+
+      board = Board.new
+      p = Pawn.new(6, 0, :black, board)
+      board.execute_move('a2', 'a1', :black)
+      assert board[7, 0].is_a? Queen
+
+      board = Board.new
+      p = Pawn.new(1, 0, :white, board)
+      board.execute_move('a7', 'a8', :white, Knight)
+      assert board[0, 0].is_a? Knight
     end
 
     def test_kingside_castle
       board = Board.new
-      k = King.new(7, 4, :white, board)
+      assert_raises(IllegalMove) { board.kingside_castle(:white) }
+      assert_raises(IllegalMove) { board.kingside_castle(:black) }
+
       r = Rook.new(7, 7, :white, board)
+      assert_raises(IllegalMove) { board.kingside_castle(:white) }
+
+      k = King.new(7, 4, :white, board)
       assert board.kingside_castle(:white)
 
       board = Board.new
@@ -80,8 +95,13 @@ module Chess
 
     def test_queenside_castle
       board = Board.new
-      k = King.new(7, 4, :white, board)
+      assert_raises(IllegalMove) { board.queenside_castle(:white) }
+      assert_raises(IllegalMove) { board.queenside_castle(:black) }
+
       r = Rook.new(7, 0, :white, board)
+      assert_raises(IllegalMove) { board.queenside_castle(:white) }
+
+      k = King.new(7, 4, :white, board)
       assert board.queenside_castle(:white)
 
       board = Board.new
@@ -91,23 +111,18 @@ module Chess
       assert_raises(IllegalMove) { board.queenside_castle(:black) }
     end
 
-    def xtest_game_run
-      board = Board.new.reset
-      Game.new(board).play
-    end
-
     def test_deep_copy
       board = Board.new.reset
       copy_board = board.deep_copy
 
       assert copy_board.same_as?(board)
 
-      assert copy_board.make_move('a2', 'a4', :white)
+      assert copy_board.execute_move('a2', 'a4', :white)
       assert !copy_board.same_as?(board)
 
       board = Board.new.reset
       copy_board = board.deep_copy
-      assert board.make_move('e7', 'e5', :black)
+      assert board.execute_move('e7', 'e5', :black)
       assert !copy_board.same_as?(board)
     end
 

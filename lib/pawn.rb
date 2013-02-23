@@ -15,7 +15,14 @@ module Chess
       @player == :white ? "p".yellow.bold : "p".red.bold
     end
 
-    private
+    def move(to_row, to_column, into_piece = Queen)
+      super(to_row, to_column)
+      if (@player == :white and to_row == 0) or (@player == :black and to_row == 7)
+        @board[to_row, to_column] = into_piece.new(to_row, to_column, @player, @board)
+      end
+
+      true
+    end
 
     def valid_move?(to_row, to_column)
       return false if range.none? { |row, column| row == to_row and column == to_column}
@@ -33,7 +40,5 @@ module Chess
       @vector_moves.map { |delta_row, delta_column|  [@row + delta_row, @column + delta_column]}.
         select { |row, column| row.between?(0, 7) and column.between?(0, 7) }
     end
-
-    # TO DO: promotion, en passant
   end
 end

@@ -1,6 +1,10 @@
 ﻿# this file defines additional methods for Chess::Board and Chess::Piece, in order to provide less complicated tests
 
 module Chess
+  class Game
+    attr_accessor :board, :current_player
+  end
+
   class Board
     attr_accessor :field
 
@@ -16,7 +20,7 @@ module Chess
   end
 
   class Piece
-    attr_accessor :row, :column, :player, :board, :vector_moves
+    attr_accessor :vector_moves
 
     public :valid_move?, :range, :move_causes_self_check?, :leap?, :under_attack?
 

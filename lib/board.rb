@@ -1,7 +1,5 @@
-﻿$:.unshift('chess/lib')
-
-require 'string_formatting'
-require 'game'
+﻿require 'string_formatting'
+require 'piece'
 require 'king'
 require 'queen'
 require 'rook'
@@ -19,6 +17,8 @@ module Chess
     FILE             = COLUMN.invert
     RANK             = ROW.invert
 
+    attr_accessor :field
+
     def initialize
       @field = Array.new(8) { Array.new(8) }
     end
@@ -35,17 +35,21 @@ module Chess
       @field.flatten.find { |piece| piece and piece.is_a?(King) and piece.player == player }
     end
 
-    def make_move(from_square, to_square, player)
+    def execute_move(from_square, to_square, player, promotion = Queen)
       from_row = ROW[from_square[1]]
       from_column = COLUMN[from_square[0].downcase]
       to_row = ROW[to_square[1]]
       to_column = COLUMN[to_square[0].downcase]
-      if self[from_row, from_column].player != player
+      if self[from_row, from_column].nil? or self[from_row, from_column].player != player
         piece_type = self[from_row, from_column].class.name.split('::').last
-        raise IllegalMove, "Piece on #{from_square} does not belong to #{player} player!".red.bold
+        raise IllegalMove, "There's no #{player}'s piece on #{from_square}!".red.bold
       end
       begin
-        self[from_row, from_column].move(to_row, to_column)
+        if self[from_row, from_column].is_a? Pawn
+          self[from_row, from_column].move(to_row, to_column, promotion)
+        else
+          self[from_row, from_column].move(to_row, to_column)
+        end
       rescue IllegalMove
         piece_type = self[from_row, from_column].class.name.split('::').last
         raise IllegalMove, "Cannot move #{piece_type} from #{from_square} to #{to_square}!".red.bold
@@ -56,18 +60,26 @@ module Chess
 
     def queenside_castle(player)
       if player == :white
-        self[7, 0].castle
+        row, column = [7, 0]
       else
-        self[0, 0].castle
+        row, column = [0, 0]
       end
+      if self[row, column].nil? or self[row, column].class != Rook or self[row, column].player != player
+        raise IllegalMove, "Cannot castle!".red.bold
+      end
+      self[row, column].castle
     end
 
     def kingside_castle(player)
       if player == :white
-        self[7, 7].castle
+        row, column = [7, 7]
       else
-        self[0, 7].castle
+        row, column = [0, 7]
       end
+      if self[row, column].nil? or self[row, column].class != Rook or self[row, column].player != player
+        raise IllegalMove, "Cannot castle!".red.bold
+      end
+      self[row, column].castle
     end
 
     def deep_copy
@@ -87,20 +99,21 @@ module Chess
 
     def show
       puts
-      puts "  +---+---+---+---+---+---+---+---+"
+      puts "  +---+---+---+---+---+---+---+---+".bold
       @field.each_with_index do |row, i|
-        print "#{1.upto(8).to_a.reverse[i]} |"
+        print "#{1.upto(8).to_a.reverse[i]} |".bold
 				row.each do |piece|
           if piece
-            print " #{piece.sign} |"
+            print " #{piece.sign}", " |".bold
           else
-            print "   |"
+            print "   |".bold
+
           end
         end
         puts
-        puts "  +---+---+---+---+---+---+---+---+"
+        puts "  +---+---+---+---+---+---+---+---+".bold
       end
-      puts "    a   b   c   d   e   f   g   h"
+      puts "    a   b   c   d   e   f   g   h".bold
 
       self # just because it's cool
     end
@@ -176,7 +189,7 @@ module Chess
       board
     rescue
       raise "Invalid string to load from! - '#{str}'".red.bold
-end
+    end
 
     def self.load_from_database(mysql2_client, table_name)
       board = Board.new

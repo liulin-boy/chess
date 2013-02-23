@@ -1,6 +1,5 @@
 ﻿require 'rook'
 require 'minitest/autorun'
-#require_relative 'utilities'
 
 module Chess
   class RookTester < MiniTest::Unit::TestCase
@@ -17,8 +16,10 @@ module Chess
 
     def test_castle
       board = Board.new
-      k = King.new(0, 4, :black, board)
       r = Rook.new(0, 0, :black, board)
+      assert_raises(IllegalMove) {r.castle}
+
+      k = King.new(0, 4, :black, board)
       assert r.castle
       assert_equal k, board[0, 2]
       assert_equal r, board[0, 3]

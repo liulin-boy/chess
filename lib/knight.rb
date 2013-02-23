@@ -11,8 +11,6 @@ module Chess
       @player == :white ? "N".yellow.bold : "N".red.bold
     end
 
-    private
-
     def leap?(to_row, to_column)
       false
     end

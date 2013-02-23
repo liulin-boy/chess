@@ -9,15 +9,15 @@ module Chess
 
     def castle
       king = @board.find_king(@player)
-			raise IllegalMove unless first_move? and king.first_move?
-      raise IllegalMove if king.in_check?
+			raise IllegalMove, "Cannot castle!".red.bold if king.nil? or king.in_check?
+      raise IllegalMove, "Cannot castle!".red.bold unless first_move? and king.first_move?
       if @column == 0 # 0-0-0
-        raise IllegalMove if king.move_causes_self_check?(king.row, 3) or
+        raise IllegalMove, "Cannot castle!".red.bold if king.move_causes_self_check?(king.row, 3) or
           @board[@row, 1] or @board[@row, 2] or @board[@row, 3]
         king.column = 2
         if king.in_check?
           king.column = 4
-          raise IllegalMove
+          raise IllegalMove, "Cannot castle!".red.bold
         end
         @board[king.row, 4] = nil
         @board[king.row, 2] = king
@@ -27,7 +27,7 @@ module Chess
 
         true
       else # 0-0
-        raise IllegalMove if king.move_causes_self_check?(king.row, 5) or @board[@row, 5] or @board[@row, 6]
+        raise IllegalMove, "Cannot castle!".red.bold if king.move_causes_self_check?(king.row, 5) or @board[@row, 5] or @board[@row, 6]
         king.column = 6
         if king.in_check?
           king.column = 4

@@ -41,17 +41,28 @@ module Chess
       Pawn.new(2, 3, :white, board)
       assert p.valid_move?(2, 3)
 
-      board = Board.new()
+      board = Board.new
       p = Pawn.new(1, 2, :black, board)
-      p.move(2, 2)
+      assert p.move(2, 2)
       assert !p.valid_move?(4, 2)
     end
 
     def test_move
-      board = Board.new()
+      board = Board.new
       p = Pawn.new(1, 2, :black, board)
-      p.move(2, 2)
+      assert p.move(2, 2)
       assert !p.first_move?
+
+      board = Board.new
+      p = Pawn.new(6, 0, :black, board)
+      assert p.move(7, 0, Bishop)
+      assert board[7, 0].is_a? Bishop
+
+      board = Board.new
+      p = Pawn.new(1, 0, :white, board)
+      r = Rook.new(0, 1, :black, board)
+      assert p.move(0, 1)
+      assert board[0, 1].is_a? Queen
     end
   end
 end

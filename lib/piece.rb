@@ -1,8 +1,9 @@
-﻿#require 'board'
-require 'errors'
+﻿require 'errors'
 
 module Chess
   class Piece
+    attr_accessor :row, :column, :player, :board
+
     def initialize(row, column, player, board, first_move = true)
       @row, @column = row, column
       @player, @board = player, board
@@ -25,8 +26,6 @@ module Chess
     def first_move?
       @first_move
     end
-
-    private
 
     def range
       squares_in_range = []
@@ -57,20 +56,18 @@ module Chess
       raise IllegalMove if @board[to_row, to_column] and @board[to_row, to_column].player == @player
       raise IllegalMove if leap?(to_row, to_column)
       copy_board = @board.deep_copy
-
       piece = copy_board[@row, @column]
       copy_board[@row, @column] = nil
       copy_board[to_row, to_column] = piece
       piece.row, piece.column = to_row, to_column
       king = copy_board.find_king(@player)
-
       king and king.in_check?
     end
 
     def under_attack?
       @board.field.flatten.any? do |piece|
         piece and piece.player != @player and
-          piece.valid_move?(@row, @column)
+          piece.range.include?([@row, @column]) and not piece.leap?(@row, @column)
       end
     end
 

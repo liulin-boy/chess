@@ -37,7 +37,11 @@ module Chess
       assert_equal 2, p.column
       assert_equal :white, p.player
       assert_equal board, p.board
+      assert p.first_move?
       assert_equal p, p.board[1,2]
+
+      p = Piece.new(1, 2, :white, board, false)
+      assert !p.first_move?
     end
 
     def test_move
@@ -144,6 +148,14 @@ module Chess
       assert !b1.move_causes_self_check?(4, 4)
       b3 = Bishop.new(4, 5, :black, board)
       assert k.move_causes_self_check?(0, 1)
+
+      board = Board.new
+      k = King.new(7, 0, :white, board)
+      r = Rook.new(0, 4, :white, board)
+      King.new(1, 5, :black, board)
+      Queen.new(6, 0, :black, board)
+      Knight.new(4, 1, :black, board)
+      assert r.move_causes_self_check?(0, 5)
     end
   end
 end
