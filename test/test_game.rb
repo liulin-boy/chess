@@ -1,7 +1,6 @@
 ﻿require 'game'
 require 'minitest/autorun'
 require_relative 'utilities'
-
 module Chess
   class GameTester < MiniTest::Unit::TestCase
     def test_initialize
