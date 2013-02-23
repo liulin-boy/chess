@@ -1,6 +1,5 @@
-Chess
+chess
 =====
 
-A simple and full of bugs attempt to simulate chess game between two human players.
+A simple and full of bugs attempt to simulate chess game between two human players, written for [Ruby course in Sofia University](http://fmi.ruby.bg/)
 
-A.k.a. You've just come to the wrong place.
