@@ -102,12 +102,11 @@ module Chess
       puts "  +---+---+---+---+---+---+---+---+".bold
       @field.each_with_index do |row, i|
         print "#{1.upto(8).to_a.reverse[i]} |".bold
-				row.each do |piece|
+        row.each do |piece|
           if piece
             print " #{piece.sign}", " |".bold
           else
             print "   |".bold
-
           end
         end
         puts
@@ -204,10 +203,9 @@ module Chess
       results = mysql2_client.query("SELECT * FROM #{table_name}")
       results.each do |item|
         piece_type = eval(item["piece_type"])
-        row        = ROW[item["rank"].to_s] # TO DO: data validation
+        row        = ROW[item["rank"].to_s]
         column     = COLUMN[item["file"]]
         player     = item["player"].to_sym
-
         if item["first_move"] == "1"
           first_move = true
         elsif item["first_move"] == "0"

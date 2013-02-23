@@ -1,4 +1,5 @@
-﻿# this file defines additional methods for Chess::Board and Chess::Piece, in order to provide less complicated tests
+﻿# this file defines additional methods for Chess::Game, Chess::Board, Chess::Piece, Chess::King,
+# Chess::Pawn and Chess::Knight, in order to provide less complicated tests
 
 module Chess
   class Game

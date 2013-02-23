@@ -9,7 +9,7 @@ module Chess
 
     def castle
       king = @board.find_king(@player)
-			raise IllegalMove, "Cannot castle!".red.bold if king.nil? or king.in_check?
+      raise IllegalMove, "Cannot castle!".red.bold if king.nil? or king.in_check?
       raise IllegalMove, "Cannot castle!".red.bold unless first_move? and king.first_move?
       if @column == 0 # 0-0-0
         raise IllegalMove, "Cannot castle!".red.bold if king.move_causes_self_check?(king.row, 3) or
@@ -43,7 +43,7 @@ module Chess
       king.instance_variable_set(:@first_move, false)
 
       true
-		end
+    end
 
     def sign
       @player == :white ? "R".yellow.bold : "R".red.bold

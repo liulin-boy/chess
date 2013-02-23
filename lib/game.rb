@@ -10,8 +10,8 @@ module Chess
 
     def play
       @current_player = :white
+      print_instructions
       @board.show
-      puts "Game started!".magenta.bold
       loop do
         break if end_of_game?
           determine_check(@current_player)
@@ -48,7 +48,27 @@ module Chess
       new(board)
     end
 
+    private
+
     PROMOTION_PIECE = {'Q' => Queen, 'R' => Rook, 'N' => Knight, 'B' =>Bishop}
+
+    def print_instructions
+      puts "Instructions:".cyan.bold
+      puts ""
+      puts "To make a move, enter the coordinates of the piece you want to move, ".cyan.bold
+      puts "then space, then the coordinates of the target square.".cyan.bold
+      puts "Example 'e2 e4' will move a piece from e2 to e4 (if move is legal).".cyan.bold
+      puts ""
+      puts "To castle, enter '0-0' or '0-0-0'.".cyan.bold
+      puts ""
+      puts "For promotion, write the letter of the piece you want the pawn to be promoted to.".cyan.bold
+      puts "Example 'a7 a8 R' will promote the pawn into a Rook (if move is legal).".cyan.bold
+      puts "If no piece for the promotion is specified, it's Queen, by default.".cyan.bold
+      puts ""
+      puts "To resign, enter 'res' or 'resign'.".cyan.bold
+      puts ""
+      puts "Game started!".magenta.bold
+    end
 
     def change_player
       if @current_player == :white
@@ -69,7 +89,7 @@ module Chess
     end
 
     def execute_move(move, player)
-      if move =~ /(?<from>[a-h][1-8]) (?<to>[a-h][1-8])(?<promotion>[QRNB]?)/i
+      if move =~ /(?<from>[a-h][1-8]) (?<to>[a-h][1-8])( )?(?<promotion>[QRNB]?)/i
         if $~[:promotion] == ""
           @board.execute_move($~[:from], $~[:to], player)
         else
